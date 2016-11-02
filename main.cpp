@@ -3,12 +3,14 @@
 int qnt_pontos;
 Ponto pnts[1000];
 GLfloat mouse_x, mouse_y;
+bool showPoli;
 
 //Estado inicial
 void init(){
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	srand(time(NULL));
 	qnt_pontos = 0;
+	showPoli = true;
 }
 
 //Calcula o fatorial de x
@@ -86,7 +88,7 @@ void display(){
 	//Pinta todos os pontos de 'pnts'
 	for (int i=0; i<qnt_pontos;++i){
 		desenhaPonto(pnts[i].x, pnts[i].y);
-		if (i>0) ligaPontos(pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y);
+		if (i>0 && showPoli) ligaPontos(pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y);
 		if (i%3 == 0 && (i>0)) bezier(pnts[i-3].x, pnts[i-3].y, pnts[i-2].x, pnts[i-2].y, pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y, 0.001f);
 	}
 
@@ -117,6 +119,9 @@ void hadleKeyboard(unsigned char key, int x, int y){
 void hadleSpecialKeyboard(int key, int x, int y){
 	if(key == GLUT_KEY_F5){
 		init();
+	}
+	if(key == GLUT_KEY_F4){
+		showPoli = !showPoli;
 	}
 }
 
