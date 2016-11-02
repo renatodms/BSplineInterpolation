@@ -11,6 +11,20 @@ void init(){
 	qnt_pontos = 0;
 }
 
+//Calcula o fatorial de x
+float fat(int x){
+	float n = 1.0f;
+	for (int i = x; i > 0; --i){
+		n *= (float)i;
+	}
+	return n;
+}
+
+//Calcula combinacao (a b)
+float comb(int a, int b){
+	return fat(b)/(fat(a)*fat(b-a));
+}
+
 //Printa um ponto nas coordenadas (x,y)
 void desenhaPonto(GLint x, GLint y){
 	glColor3f(1.0f, 0.0f, 0.0f);
@@ -31,6 +45,33 @@ void ligaPontos(GLint x1, GLint y1, GLint x2, GLint y2){
 	glEnd();
 }
 
+//Desenha curva de bezier de grau 3 entres os pontos (x1, y1), (x2, y2), (x3, y3) e (x4, y4) com suavidade n
+void bezier(GLint x1, GLint y1, GLint x2, GLint y2, GLint x3, GLint y3, GLint x4, GLint y4, GLfloat n){
+	glColor3f(0.0f,1.0f,0.0f);
+	glBegin(GL_POINTS);
+	for (GLfloat u = 0.0f; u <= 1.0f; u+=n){
+		GLfloat x = 0.0f;
+		GLfloat y = 0.0f;
+
+		//Qualcular coordenadas para cada ponto da curva de bezier
+		int i = 0;
+		x += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*x1;
+        y += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*y1;
+		i = 1;
+		x += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*x2;
+        y += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*y2;
+		i = 2;
+		x += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*x3;
+        y += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*y3;
+		i = 3;
+		x += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*x4;
+        y += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*y4;
+
+		glVertex2f(x,y);
+	}      
+	glEnd();
+}
+
 //Rotina magica (copiada do Template2D.cpp)
 void reshape(GLsizei w, GLsizei h){
 	glViewport(0, 0, w, h);
@@ -46,6 +87,7 @@ void display(){
 	for (int i=0; i<qnt_pontos;++i){
 		desenhaPonto(pnts[i].x, pnts[i].y);
 		if (i>0) ligaPontos(pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y);
+		if (i%3 == 0 && (i>0)) bezier(pnts[i-3].x, pnts[i-3].y, pnts[i-2].x, pnts[i-2].y, pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y, 0.001f);
 	}
 
 	glFlush();
