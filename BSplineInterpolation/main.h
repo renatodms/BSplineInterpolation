@@ -4,8 +4,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#include <gl/glut.h>
 #include <math.h>
+#include <gl/glut.h>
 #include <iostream>
 using namespace std;
 

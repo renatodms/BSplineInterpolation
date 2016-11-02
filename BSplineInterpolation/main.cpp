@@ -12,13 +12,22 @@ void init(){
 }
 
 //Printa um ponto nas coordenadas (x,y)
-void draw(GLint x, GLint y){
+void desenhaPonto(GLint x, GLint y){
 	glColor3f(1.0f, 0.0f, 0.0f);
 	glBegin(GL_LINE_LOOP);
 		for(int i = 0; i < 8; i++) {
 			float angulo = i * 2 * M_PI / 8;
 			glVertex2f(x + (cos(angulo) * 4), y + (sin(angulo) * 4));
 		}
+	glEnd();
+}
+
+//Liga os pontos (x1, y1) e (x2, y2)
+void ligaPontos(GLint x1, GLint y1, GLint x2, GLint y2){
+	glColor3f(0.0f, 0.0f, 0.0f);
+	glBegin(GL_LINES);
+		glVertex2i(x1, y1);
+		glVertex2i(x2, y2);
 	glEnd();
 }
 
@@ -35,7 +44,8 @@ void display(){
 
 	//Pinta todos os pontos de 'pnts'
 	for (int i=0; i<qnt_pontos;++i){
-		draw(pnts[i].x, pnts[i].y);
+		desenhaPonto(pnts[i].x, pnts[i].y);
+		if (i>0) ligaPontos(pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y);
 	}
 
 	glFlush();
