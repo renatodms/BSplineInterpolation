@@ -17,6 +17,12 @@ void init(){
 	movendo = -1;
 }
 
+//Gera os pontos que nao sao entrada do usuario
+void gerarPontos(GLint x, GLint y){
+	pnts[qnt_pontos++] = Ponto((pnts[qnt_pontos-1].x+x)/2, (pnts[qnt_pontos-1].y+y)/2);
+	pnts[qnt_pontos++] = Ponto(pnts[qnt_pontos-1].x+10, pnts[qnt_pontos-1].y);
+}
+
 //Calcula o fatorial de x
 float fat(int x){
 	float n = 1.0f;
@@ -90,16 +96,17 @@ void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//Pinta todos os pontos de 'pnts'
-	if(fechada){
+	if(fechada && qnt_pontos != 0){
+		gerarPontos(pnts[0].x, pnts[0].y);
 		pnts[qnt_pontos++] = pnts[0];
 	}
 	for (int i=0; i<qnt_pontos; ++i){
-		desenhaPonto(pnts[i].x, pnts[i].y);
+		if (i == 0 || i%3 == 0 || showPoli) desenhaPonto(pnts[i].x, pnts[i].y);
 		if (i>0 && showPoli) ligaPontos(pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y);
 		if (i%3 == 0 && (i>0)) bezier(pnts[i-3].x, pnts[i-3].y, pnts[i-2].x, pnts[i-2].y, pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y, 0.001f);
 	}
-	if(fechada){
-		qnt_pontos--;
+	if(fechada && qnt_pontos != 0){
+		qnt_pontos-=3;
 	}
 
 	glFlush();
@@ -109,11 +116,12 @@ void handleMouse(int btn, int state, int x, int y){
 	//Deleta o ponto clicando com o botao direito do mouse
 	if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN){
 		for(int i=0; i<qnt_pontos; ++i){
-			if(pnts[i].x-4 < x && pnts[i].x+4 > x && pnts[i].y-4 < y && pnts[i].y+4 > y){
+			if(pnts[i].x-4 < x && pnts[i].x+4 > x && pnts[i].y-4 < y && pnts[i].y+4 > y && i%3 == 0){
 				for(int j=i; j<qnt_pontos-1; ++j){
-					pnts[j] = pnts[j+1];
+					if (i != 0) pnts[j-2] = pnts[j+1];
+					else pnts[j] = pnts[j+3];
 				}
-				qnt_pontos--;
+				qnt_pontos-=3;
 				break;
 			}
 		}
@@ -128,7 +136,10 @@ void handleMouse(int btn, int state, int x, int y){
 				break;
 			}
 		}
-		if (free) pnts[qnt_pontos++] = Ponto(x, y);
+		if (free){
+			if (qnt_pontos != 0) gerarPontos(x, y);
+			pnts[qnt_pontos++] = Ponto(x, y);
+		}
 	}
 	//Mudar estado de movendo para -1
 	if((btn == GLUT_LEFT_BUTTON && state == GLUT_UP) || (btn == GLUT_RIGHT_BUTTON && state == GLUT_UP)){
@@ -142,7 +153,7 @@ void handleMotion(int x, int y){
 			pnts[movendo].y = y;
 	} else {
 		for(int i=0; i<qnt_pontos; ++i){
-			if(pnts[i].x-4 < x && pnts[i].x+4 > x && pnts[i].y-4 < y && pnts[i].y+4 > y){
+			if(pnts[i].x-4 < x && pnts[i].x+4 > x && pnts[i].y-4 < y && pnts[i].y+4 > y && (i%3 == 0 || i==0)){
 				movendo = i;
 				break;
 			}
