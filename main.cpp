@@ -4,13 +4,15 @@ int qnt_pontos;
 Ponto pnts[1000];
 GLfloat mouse_x, mouse_y;
 bool showPoli;
+int movendo;
 
 //Estado inicial
 void init(){
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	srand(time(NULL));
 	qnt_pontos = 0;
-	showPoli = true;
+	showPoli = false;
+	movendo = -1;
 }
 
 //Calcula o fatorial de x
@@ -55,7 +57,7 @@ void bezier(GLint x1, GLint y1, GLint x2, GLint y2, GLint x3, GLint y3, GLint x4
 		GLfloat x = 0.0f;
 		GLfloat y = 0.0f;
 
-		//Qualcular coordenadas para cada ponto da curva de bezier
+		//Qualcular coordenadas para cada ponto da curva de bezier (Algoritmo de DeCasteljau)
 		int i = 0;
 		x += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*x1;
         y += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*y1;
@@ -86,7 +88,7 @@ void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//Pinta todos os pontos de 'pnts'
-	for (int i=0; i<qnt_pontos;++i){
+	for (int i=0; i<qnt_pontos; ++i){
 		desenhaPonto(pnts[i].x, pnts[i].y);
 		if (i>0 && showPoli) ligaPontos(pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y);
 		if (i%3 == 0 && (i>0)) bezier(pnts[i-3].x, pnts[i-3].y, pnts[i-2].x, pnts[i-2].y, pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y, 0.001f);
@@ -96,33 +98,70 @@ void display(){
 }
 
 void handleMouse(int btn, int state, int x, int y){
-	//Printa as coordenadas clicando com o botao direito do mouse
+	//Deleta o ponto clicando com o botao direito do mouse
 	if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN){
-		cout << "(" << x << ", " << y << ")" << endl;
+		for(int i=0; i<qnt_pontos; ++i){
+			if(pnts[i].x-4 < x && pnts[i].x+4 > x && pnts[i].y-4 < y && pnts[i].y+4 > y){
+				for(int j=i; j<qnt_pontos-1; ++j){
+					pnts[j] = pnts[j+1];
+				}
+				qnt_pontos--;
+				break;
+			}
+		}
 	}
 	//Adiciona o ponto clicando com o botao esquerdo do mouse
-	if(btn == GLUT_LEFT_BUTTON){
-		if (state == GLUT_DOWN){
-			pnts[qnt_pontos++] = Ponto(x, y);
+	if(btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+		//Chega se mouse esta em algum ponto de controle
+		bool free = true;
+		for(int i=0; i<qnt_pontos; ++i){
+			if(pnts[i].x-4 < x && pnts[i].x+4 > x && pnts[i].y-4 < y && pnts[i].y+4 > y){
+				free = false;
+				break;
+			}
 		}
+		if (free) pnts[qnt_pontos++] = Ponto(x, y);
+	}
+	//Mudar estado de movendo para -1
+	if((btn == GLUT_LEFT_BUTTON && state == GLUT_UP) || (btn == GLUT_RIGHT_BUTTON && state == GLUT_UP)){
+		movendo = -1;
 	}
 }
 
-//Fecha aplicacao ao apertar ESC
+void handleMotion(int x, int y){
+	if (movendo != -1){
+			pnts[movendo].x = x;
+			pnts[movendo].y = y;
+	} else {
+		for(int i=0; i<qnt_pontos; ++i){
+			if(pnts[i].x-4 < x && pnts[i].x+4 > x && pnts[i].y-4 < y && pnts[i].y+4 > y){
+				movendo = i;
+				break;
+			}
+		}
+	}
+	//Atualizar a tela
+	glutPostRedisplay();
+}
+
 void hadleKeyboard(unsigned char key, int x, int y){
+	//Fecha aplicacao ao apertar ESC
 	if(key == ESC){
 		exit(0);
 	}
 }
 
-//Reinicia ao apertar F5
 void hadleSpecialKeyboard(int key, int x, int y){
+	//Reinicia ao apertar F5
 	if(key == GLUT_KEY_F5){
 		init();
 	}
+	//Mostrar ou ocultar poligonais de controle
 	if(key == GLUT_KEY_F4){
 		showPoli = !showPoli;
 	}
+	//Atualizar a tela
+	glutPostRedisplay();
 }
 
 int main(int argc, char* argv[]){
@@ -134,6 +173,7 @@ int main(int argc, char* argv[]){
 	glutReshapeFunc(reshape);
 	glutDisplayFunc(display);
 	glutMouseFunc(handleMouse);
+	glutMotionFunc(handleMotion);
 	glutKeyboardUpFunc(hadleKeyboard);
 	glutSpecialUpFunc(hadleSpecialKeyboard);
 
