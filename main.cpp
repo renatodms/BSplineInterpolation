@@ -4,6 +4,7 @@ int qnt_pontos;
 Ponto pnts[1000];
 GLfloat mouse_x, mouse_y;
 bool showPoli;
+bool fechada;
 int movendo;
 
 //Estado inicial
@@ -12,6 +13,7 @@ void init(){
 	srand(time(NULL));
 	qnt_pontos = 0;
 	showPoli = false;
+	fechada = false;
 	movendo = -1;
 }
 
@@ -88,10 +90,16 @@ void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//Pinta todos os pontos de 'pnts'
+	if(fechada){
+		pnts[qnt_pontos++] = pnts[0];
+	}
 	for (int i=0; i<qnt_pontos; ++i){
 		desenhaPonto(pnts[i].x, pnts[i].y);
 		if (i>0 && showPoli) ligaPontos(pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y);
 		if (i%3 == 0 && (i>0)) bezier(pnts[i-3].x, pnts[i-3].y, pnts[i-2].x, pnts[i-2].y, pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y, 0.001f);
+	}
+	if(fechada){
+		qnt_pontos--;
 	}
 
 	glFlush();
@@ -159,6 +167,10 @@ void hadleSpecialKeyboard(int key, int x, int y){
 	//Mostrar ou ocultar poligonais de controle
 	if(key == GLUT_KEY_F4){
 		showPoli = !showPoli;
+	}
+	//Curva fechada
+	if(key == GLUT_KEY_F3){
+		fechada = !fechada;
 	}
 	//Atualizar a tela
 	glutPostRedisplay();
