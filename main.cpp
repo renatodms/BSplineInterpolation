@@ -110,10 +110,11 @@ void display(){
 	for (int i=0; i<qnt_pontos; ++i){
 		if (i == 0 || i%3 == 0 || showPoli) desenhaPonto(pnts[i].x, pnts[i].y);
 		if (i>0 && showPoli) ligaPontos(pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y);
-		float u = 9.6/slds[(i/3)-1].x;
-		/*if ((i/3)-1 == 0) u = (100*slds[(i/3)-1].x)/slds[(i/3)].x;
-		else if ((i/3)-1 == qnt_slides-1) u = (100*(slds[(i/3)-1].x - slds[(i/3)-2].x))/(960 - slds[(i/3)-2].x);
-		else u = (100*(slds[(i/3)-1].x - slds[(i/3)-2].x))/(slds[(i/3)].x - slds[(i/3)-2].x);*/
+		float u;
+		if ((i/3)-1 == 0 && qnt_pontos>4) u = 9.6/((960*(slds[(i/3)-1].x))/(slds[(i/3)].x));
+		else if ((i/3)-1 == qnt_slides-1) u = 9.6/((960*(slds[(i/3)-1].x-slds[(i/3)-2].x))/(960-slds[(i/3)-2].x));
+		else if (qnt_pontos>4) u = 9.6/((960*(slds[(i/3)-1].x-slds[(i/3)-2].x))/(slds[(i/3)].x-slds[(i/3)-2].x));
+		else u = 9.6/slds[(i/3)-1].x;
 		if (i%3 == 0 && (i>0)) bezier(pnts[i-3].x, pnts[i-3].y, pnts[i-2].x, pnts[i-2].y, pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y, u);
 	}
 	if(fechada && qnt_pontos != 0){
