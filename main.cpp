@@ -7,6 +7,7 @@ Slide slds[30];
 GLfloat mouse_x, mouse_y;
 bool showPoli;
 bool fechada;
+bool tangente;
 int movendo;
 int sliding;
 
@@ -18,14 +19,42 @@ void init(){
 	qnt_slides = 0;
 	showPoli = false;
 	fechada = false;
+	tangente = true;
 	movendo = -1;
 	sliding = -1;
 }
 
-//Gera os pontos que nao sao entrada do usuario
-void gerarPontos(GLint x, GLint y){
+//Gera os pontos que nao sao entrada do usuario (Usando FMILL)
+void algFMILL(GLint x, GLint y){
+	/********
+	*  =D   *
+	*********/
 	pnts[qnt_pontos++] = Ponto((pnts[qnt_pontos-1].x+x)/2, (pnts[qnt_pontos-1].y+y)/2);
 	pnts[qnt_pontos++] = Ponto(pnts[qnt_pontos-1].x, pnts[qnt_pontos-1].y);
+}
+
+//Gera os pontos que nao sao entrada do usuario (Usando Bessel)
+void algBessel(GLint x, GLint y){
+	/********
+	*  =D   *
+	*********/
+	pnts[qnt_pontos++] = Ponto((pnts[qnt_pontos-1].x+x)/2, (pnts[qnt_pontos-1].y+y)/2);
+	pnts[qnt_pontos++] = Ponto(pnts[qnt_pontos-1].x+10, pnts[qnt_pontos-1].y);
+}
+
+//Recalcular pnts
+void pntsAtt(){
+	/********
+	*  =D   *
+	*********/
+}
+
+void gerarPontos(GLint x, GLint y){
+	if (tangente){
+		algFMILL(x, y);
+	} else {
+		algBessel(x, y);
+	}
 }
 
 //Calcula o fatorial de x
@@ -102,6 +131,8 @@ void reshape(GLsizei w, GLsizei h){
 void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	pntsAtt();
+
 	//Pinta todos os pontos de 'pnts'
 	if(fechada && qnt_pontos != 0){
 		gerarPontos(pnts[0].x, pnts[0].y);
@@ -120,6 +151,16 @@ void display(){
 	if(fechada && qnt_pontos != 0){
 		qnt_pontos-=3;
 	}
+
+	//Mostra algoritmo de calculo de tangente atual
+	if (tangente) glColor3f(0.0f, 1.0f, 0.0f);
+	else glColor3f(1.0f, 1.0f, 0.0f);
+	glBegin(GL_QUADS);
+		glVertex2i(10, 20);
+		glVertex2i(10, 10);
+		glVertex2i(20, 10);
+		glVertex2i(20, 20);
+	glEnd();
 
 	//Mostra barra de slide
 	glColor3f(0.0f, 0.0f, 1.0f);
@@ -234,6 +275,10 @@ void hadleSpecialKeyboard(int key, int x, int y){
 	//Curva fechada
 	if(key == GLUT_KEY_F3){
 		fechada = !fechada;
+	}
+	//Escolher calculo da tangente
+	if(key == GLUT_KEY_F2){
+		tangente = !tangente;
 	}
 	//Atualizar a tela
 	glutPostRedisplay();
