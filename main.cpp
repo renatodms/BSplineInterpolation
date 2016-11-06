@@ -165,6 +165,7 @@ void display(){
 		else if ((i/3)-1 == qnt_slides-1) u = 9.6/((960*(slds[(i/3)-1].x-slds[(i/3)-2].x))/(960-slds[(i/3)-2].x));
 		else if (qnt_pontos>4) u = 9.6/((960*(slds[(i/3)-1].x-slds[(i/3)-2].x))/(slds[(i/3)].x-slds[(i/3)-2].x));
 		else u = 9.6/slds[(i/3)-1].x;
+		pntsAtt();
 		if (i%3 == 0 && (i>0)) bezier(pnts[i-3].x, pnts[i-3].y, pnts[i-2].x, pnts[i-2].y, pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y, u);
 	}
 	if(fechada && qnt_pontos != 0){
@@ -214,9 +215,9 @@ void handleMouse(int btn, int state, int x, int y){
 					else pnts[j] = pnts[j+3];
 				}
 				for(int j=(i/3)-1; j<qnt_slides-1; ++j){
-					if (i-1 != 0) slds[j] = slds[j+1];
+					slds[j] = slds[j+1];
 				}
-				qnt_slides--;
+				//qnt_slides--;
 				qnt_pontos-=3;
 				break;
 			}
