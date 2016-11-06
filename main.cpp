@@ -36,15 +36,15 @@ void algFMILL(){
 		if(i%3 == 0 && i+3<qnt_pontos){
 			Ponto xB = pnts[i-3], x = pnts[i], xA = pnts[i+3];
 			GLfloat v[2] = {xA.x-xB.x, xA.y-xB.y};
-			pnts[i-1] = Ponto(x.x-(0.1)*v[0], x.y-(0.1)*v[1]);
-			pnts[i+1] = Ponto(x.x+(0.1)*v[0], x.y+(0.1)*v[1]);
+			pnts[i-1] = Ponto(x.x-(pnts[i].u)*v[0], x.y-(pnts[i].u)*v[1]);
+			pnts[i+1] = Ponto(x.x+(pnts[i].u)*v[0], x.y+(pnts[i].u)*v[1]);
 		}
 	}
 	if(fechada){
 		Ponto xB = pnts[qnt_pontos-4], x = pnts[qnt_pontos-1], xA = pnts[0];
 		GLfloat v[2] = {xA.x-xB.x, xA.y-xB.y};
-		pnts[qnt_pontos-2] = Ponto(x.x-(0.1)*v[0], x.y-(0.1)*v[1]);
-		pnts[1] = Ponto(x.x+(0.1)*v[0], x.y+(0.1)*v[1]);
+		pnts[qnt_pontos-2] = Ponto(x.x-(pnts[qnt_pontos-2].u)*v[0], x.y-(pnts[qnt_pontos-2].u)*v[1]);
+		pnts[1] = Ponto(x.x+(pnts[1].u)*v[0], x.y+(pnts[1].u)*v[1]);
 	}
 }
 
@@ -165,6 +165,7 @@ void display(){
 		else if ((i/3)-1 == qnt_slides-1) u = 9.6/((960*(slds[(i/3)-1].x-slds[(i/3)-2].x))/(960-slds[(i/3)-2].x));
 		else if (qnt_pontos>4) u = 9.6/((960*(slds[(i/3)-1].x-slds[(i/3)-2].x))/(slds[(i/3)].x-slds[(i/3)-2].x));
 		else u = 9.6/slds[(i/3)-1].x;
+		pnts[i].u = u*10;
 		pntsAtt();
 		if (i%3 == 0 && (i>0)) bezier(pnts[i-3].x, pnts[i-3].y, pnts[i-2].x, pnts[i-2].y, pnts[i-1].x, pnts[i-1].y, pnts[i].x, pnts[i].y, u);
 	}

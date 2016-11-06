@@ -11,8 +11,8 @@
 using namespace std;
 
 struct Ponto{
-	GLfloat x, y;
-	Ponto(GLfloat x=0.0, GLfloat y=0.0):x(x),y(y){}
+	GLfloat x, y, u;
+	Ponto(GLfloat x=0.0, GLfloat y=0.0, float u=0.001):x(x),y(y),u(u){}
 };
 
 struct Slide{
