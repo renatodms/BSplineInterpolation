@@ -19,3 +19,20 @@ struct Slide{
 	GLfloat x;
 	Slide(GLfloat x=0.0):x(x){}
 };
+
+void init();
+void algFMILL();
+void algBessel();
+void pntsAtt();
+void gerarPontos(GLint x, GLint y);
+float fat(int x);
+float comb(int a, int b);
+void desenhaPonto(GLint x, GLint y);
+void ligaPontos(GLint x1, GLint y1, GLint x2, GLint y2);
+void bezier(GLint x1, GLint y1, GLint x2, GLint y2, GLint x3, GLint y3, GLint x4, GLint y4, GLfloat n);
+void reshape(GLsizei w, GLsizei h);
+void display();
+void handleMouse(int btn, int state, int x, int y);
+void handleMotion(int x, int y);
+void hadleKeyboard(unsigned char key, int x, int y);
+void hadleSpecialKeyboard(int key, int x, int y);

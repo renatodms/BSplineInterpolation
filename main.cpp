@@ -1,3 +1,9 @@
+/*************************************************
+	F5 - Reinicia
+	F4 - Mostrar/ocultar poligonais de controle
+	F3 - Curva fechada/aberta
+	F2 - Escolher calculo da tangente	
+**************************************************/
 #include "main.h"
 
 int qnt_pontos;
@@ -24,37 +30,50 @@ void init(){
 	sliding = -1;
 }
 
-//Gera os pontos que nao sao entrada do usuario (Usando FMILL)
-void algFMILL(GLint x, GLint y){
-	/********
-	*  =D   *
-	*********/
-	pnts[qnt_pontos++] = Ponto((pnts[qnt_pontos-1].x+x)/2, (pnts[qnt_pontos-1].y+y)/2);
-	pnts[qnt_pontos++] = Ponto(pnts[qnt_pontos-1].x, pnts[qnt_pontos-1].y);
+//Calcula tangente usando FMILL
+void algFMILL(){
+	for(int i=3; i<qnt_pontos; ++i){
+		if(i%3 == 0 && i+3<qnt_pontos){
+			Ponto xB = pnts[i-3], x = pnts[i], xA = pnts[i+3];
+			GLfloat v[2] = {xA.x-xB.x, xA.y-xB.y};
+			pnts[i-1] = Ponto(x.x-(0.1)*v[0], x.y-(0.1)*v[1]);
+			pnts[i+1] = Ponto(x.x+(0.1)*v[0], x.y+(0.1)*v[1]);
+		}
+	}
+	if(fechada){
+		Ponto xB = pnts[qnt_pontos-4], x = pnts[qnt_pontos-1], xA = pnts[0];
+		GLfloat v[2] = {xA.x-xB.x, xA.y-xB.y};
+		pnts[qnt_pontos-2] = Ponto(x.x-(0.1)*v[0], x.y-(0.1)*v[1]);
+		pnts[1] = Ponto(x.x+(0.1)*v[0], x.y+(0.1)*v[1]);
+	}
 }
 
-//Gera os pontos que nao sao entrada do usuario (Usando Bessel)
-void algBessel(GLint x, GLint y){
-	/********
-	*  =D   *
-	*********/
-	pnts[qnt_pontos++] = Ponto((pnts[qnt_pontos-1].x+x)/2, (pnts[qnt_pontos-1].y+y)/2);
-	pnts[qnt_pontos++] = Ponto(pnts[qnt_pontos-1].x+10, pnts[qnt_pontos-1].y);
+//Calcula tangente usando Bessel
+void algBessel(){
+	if(!fechada){
+		gerarPontos(pnts[0].x, pnts[0].y);
+		pnts[qnt_pontos++] = pnts[0];
+		algFMILL();
+		Ponto xB = pnts[qnt_pontos-4], x = pnts[qnt_pontos-1], xA = pnts[0];
+		GLfloat v[2] = {xA.x-xB.x, xA.y-xB.y};
+		pnts[1] = Ponto(x.x+(0.1)*v[0], x.y+(0.1)*v[1]);
+		qnt_pontos-=3;
+	} else algFMILL();
 }
 
 //Recalcular pnts
 void pntsAtt(){
-	/********
-	*  =D   *
-	*********/
+	if (tangente){
+		algFMILL();
+	} else {
+		algBessel();
+	}
 }
 
+//Gera dois pontos iguais entre o ponto (x,y) e o anterior
 void gerarPontos(GLint x, GLint y){
-	if (tangente){
-		algFMILL(x, y);
-	} else {
-		algBessel(x, y);
-	}
+	pnts[qnt_pontos++] = Ponto((pnts[qnt_pontos-1].x+x)/2, (pnts[qnt_pontos-1].y+y)/2);
+	pnts[qnt_pontos++] = Ponto(pnts[qnt_pontos-1].x, pnts[qnt_pontos-1].y);
 }
 
 //Calcula o fatorial de x
@@ -99,7 +118,7 @@ void bezier(GLint x1, GLint y1, GLint x2, GLint y2, GLint x3, GLint y3, GLint x4
 			GLfloat x = 0.0f;
 			GLfloat y = 0.0f;
 			
-			//Qualcular coordenadas para cada ponto da curva de bezier (Algoritmo de DeCasteljau)
+			//Qualcular coordenadas para cada ponto da curva de bezier (Algoritmo de De Casteljau)
 			int i = 0;
 			x += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*x1;
 			y += comb(i,3)*pow(u,i)*pow(1.0f-u,3-i)*y1;
@@ -130,13 +149,13 @@ void reshape(GLsizei w, GLsizei h){
 
 void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
-
 	pntsAtt();
 
 	//Pinta todos os pontos de 'pnts'
 	if(fechada && qnt_pontos != 0){
 		gerarPontos(pnts[0].x, pnts[0].y);
 		pnts[qnt_pontos++] = pnts[0];
+		pntsAtt();
 	}
 	for (int i=0; i<qnt_pontos; ++i){
 		if (i == 0 || i%3 == 0 || showPoli) desenhaPonto(pnts[i].x, pnts[i].y);
@@ -227,6 +246,7 @@ void handleMouse(int btn, int state, int x, int y){
 		movendo = -1;
 		sliding = -1;
 	}
+	pntsAtt();
 }
 
 void handleMotion(int x, int y){
@@ -253,6 +273,7 @@ void handleMotion(int x, int y){
 		}
 	}
 	//Atualizar a tela
+	pntsAtt();
 	glutPostRedisplay();
 }
 
@@ -281,6 +302,7 @@ void hadleSpecialKeyboard(int key, int x, int y){
 		tangente = !tangente;
 	}
 	//Atualizar a tela
+	pntsAtt();
 	glutPostRedisplay();
 }
 
