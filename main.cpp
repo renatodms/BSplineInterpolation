@@ -48,8 +48,8 @@ void algFMILL(){
 	}
 }
 
-//Calcula tangente usando Bessel
-void algBessel(){
+//Calcula tangente usando FMILL adaptado
+void algFMILL_adp(){
 	if(!fechada){
 		gerarPontos(pnts[0].x, pnts[0].y);
 		pnts[qnt_pontos++] = pnts[0];
@@ -66,7 +66,7 @@ void pntsAtt(){
 	if (tangente){
 		algFMILL();
 	} else {
-		algBessel();
+		algFMILL_adp();
 	}
 }
 
